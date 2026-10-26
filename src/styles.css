@@ -1,0 +1,109 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/lora";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design system definition — SEYI F.A.B.
+ *
+ * Warm earthy palette matching the printed invoice PDF:
+ * terracotta primary (#BE6F45), deep cocoa brown (#583424),
+ * cream surfaces (#F3EBDB) and soft sand borders (#E3D8C5).
+ *
+ * The @theme inline block maps CSS custom properties to Tailwind utility
+ * classes (e.g. --color-primary -> bg-primary, text-primary).
+ * All colors MUST use oklch format.
+ */
+
+@theme inline {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Lora Variable", Georgia, serif;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-brand-brown: var(--brand-brown);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(0.975 0.012 85);
+  --foreground: oklch(0.24 0.045 45);
+  --card: oklch(0.995 0.005 85);
+  --card-foreground: oklch(0.24 0.045 45);
+  --popover: oklch(0.995 0.005 85);
+  --popover-foreground: oklch(0.24 0.045 45);
+  --primary: oklch(0.62 0.115 50);
+  --primary-foreground: oklch(0.99 0.01 85);
+  --secondary: oklch(0.94 0.028 85);
+  --secondary-foreground: oklch(0.33 0.055 45);
+  --muted: oklch(0.94 0.02 85);
+  --muted-foreground: oklch(0.53 0.03 65);
+  --accent: oklch(0.94 0.028 85);
+  --accent-foreground: oklch(0.33 0.055 45);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(0.88 0.03 80);
+  --input: oklch(0.88 0.03 80);
+  --ring: oklch(0.62 0.115 50);
+  --brand-brown: oklch(0.33 0.055 45);
+}
+
+.dark {
+  --background: oklch(0.185 0.02 45);
+  --foreground: oklch(0.93 0.02 85);
+  --card: oklch(0.225 0.025 45);
+  --card-foreground: oklch(0.93 0.02 85);
+  --popover: oklch(0.225 0.025 45);
+  --popover-foreground: oklch(0.93 0.02 85);
+  --primary: oklch(0.7 0.11 50);
+  --primary-foreground: oklch(0.18 0.03 45);
+  --secondary: oklch(0.28 0.03 45);
+  --secondary-foreground: oklch(0.93 0.02 85);
+  --muted: oklch(0.28 0.03 45);
+  --muted-foreground: oklch(0.7 0.03 65);
+  --accent: oklch(0.3 0.035 50);
+  --accent-foreground: oklch(0.93 0.02 85);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.62 0.115 50);
+  --brand-brown: oklch(0.55 0.06 45);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+}
