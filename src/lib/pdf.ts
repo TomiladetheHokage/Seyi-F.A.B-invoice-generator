@@ -37,11 +37,20 @@ const COLORS = {
 };
 
 // Table columns
+// A4 content width = 495 pt. Columns (right-aligned anchors):
+//   Description: starts at DESC_X, wraps within DESC_W
+//   Qty:         centred at QTY_X
+//   Unit price:  right-aligned to UNIT_X
+//   Amount:      right-aligned to AMT_X  (= RIGHT - 6)
+//
+// ₦2,000,000.00 at size 10 Inter is ~82 pt wide, so we need at least
+// ~90 pt per numeric column.  Shrink description by 30 pt and push
+// the numeric anchors left to create proper breathing room.
 const DESC_X = M + 8;
-const DESC_W = 290;
-const QTY_X = 372;
-const UNIT_X = 468;
-const AMT_X = RIGHT - 6;
+const DESC_W = 255;           // was 290 — gives back space to numeric cols
+const QTY_X = 345;            // was 372
+const UNIT_X = 440;           // was 468 — right anchor for "Unit price"
+const AMT_X = RIGHT - 6;      // 539.28 — unchanged, right edge of content
 
 /**
  * Keep every drawn string inside the glyph range of the embedded
@@ -259,15 +268,21 @@ export async function generateInvoicePdf(
     cursor += 16;
   }
   cursor += 2;
+  // The separator spans from the label column left edge to the right edge.
   page.drawLine({
-    start: { x: UNIT_X - 120, y: PAGE_H - cursor },
+    start: { x: UNIT_X - 130, y: PAGE_H - cursor },
     end: { x: AMT_X, y: PAGE_H - cursor },
     thickness: 1,
     color: COLORS.brown,
   });
   cursor += 12;
-  draw(page, "GRAND TOTAL", UNIT_X, cursor, 11, i700, COLORS.ink, "right");
-  draw(page, safe(formatKobo(invoice.grandTotalKobo)), AMT_X, cursor, 12.5, i700, COLORS.terra, "right");
+  // Measure the grand total amount first so we can push the label far enough
+  // left to never collide, even with very large numbers (₦1,000,000.00+).
+  const grandTotalText = safe(formatKobo(invoice.grandTotalKobo));
+  const grandTotalW = i700.widthOfTextAtSize(grandTotalText, 12.5);
+  const labelRightX = AMT_X - grandTotalW - 12; // at least 12 pt gap
+  draw(page, "GRAND TOTAL", labelRightX, cursor, 11, i700, COLORS.ink, "right");
+  draw(page, grandTotalText, AMT_X, cursor, 12.5, i700, COLORS.terra, "right");
   cursor += 30;
 
   // ---- Payment details ----
