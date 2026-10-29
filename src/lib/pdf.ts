@@ -36,21 +36,12 @@ const COLORS = {
   line: hex("#E3D8C5"),
 };
 
-// Table columns
-// A4 content width = 495 pt. Columns (right-aligned anchors):
-//   Description: starts at DESC_X, wraps within DESC_W
-//   Qty:         centred at QTY_X
-//   Unit price:  right-aligned to UNIT_X
-//   Amount:      right-aligned to AMT_X  (= RIGHT - 6)
-//
-// ₦2,000,000.00 at size 10 Inter is ~82 pt wide, so we need at least
-// ~90 pt per numeric column.  Shrink description by 30 pt and push
-// the numeric anchors left to create proper breathing room.
+// Table columns - adjusted for proper spacing with large amounts
 const DESC_X = M + 8;
-const DESC_W = 255;           // was 290 — gives back space to numeric cols
-const QTY_X = 345;            // was 372
-const UNIT_X = 440;           // was 468 — right anchor for "Unit price"
-const AMT_X = RIGHT - 6;      // 539.28 — unchanged, right edge of content
+const DESC_W = 290;
+const QTY_X = 372;
+const UNIT_X = 450;  // Moved left from 468 to create more space
+const AMT_X = RIGHT - 6;
 
 /**
  * Keep every drawn string inside the glyph range of the embedded
@@ -181,8 +172,8 @@ export async function generateInvoicePdf(
   // Vertically center INVOICE text alongside the logo
   const invoiceMidY = LOGO_TOP + LOGO_SIZE / 2;
   draw(page, "INVOICE", RIGHT, invoiceMidY - 10, 22, l700, COLORS.terra, "right");
-  draw(page, safe(invoice.invoiceNumber), RIGHT, invoiceMidY + 12, 9.5, i600, COLORS.ink, "right");
-  draw(page, safe(invoice.dateDisplay), RIGHT, invoiceMidY + 26, 9.5, i400, COLORS.muted, "right");
+  draw(page, safe(invoice.invoiceNumber), RIGHT, invoiceMidY + 12, 10, i600, COLORS.ink, "right");
+  draw(page, safe(invoice.dateDisplay), RIGHT, invoiceMidY + 26, 10, i400, COLORS.muted, "right");
   page.drawLine({
     start: { x: M, y: PAGE_H - (LOGO_TOP + LOGO_SIZE + 10) },
     end: { x: RIGHT, y: PAGE_H - (LOGO_TOP + LOGO_SIZE + 10) },
@@ -192,10 +183,10 @@ export async function generateInvoicePdf(
 
   // ---- Customer ----
   cursor = LOGO_TOP + LOGO_SIZE + 28;
-  draw(page, "BILLED TO", M, cursor, 7.5, i600, COLORS.muted);
-  cursor += 15;
-  draw(page, safe(invoice.customerName || "—"), M, cursor, 12.5, i600, COLORS.ink);
+  draw(page, "BILLED TO", M, cursor, 8, i600, COLORS.muted);
   cursor += 16;
+  draw(page, safe(invoice.customerName || "—"), M, cursor, 13, i600, COLORS.ink);
+  cursor += 17;
   if (invoice.attention) {
     draw(page, safe(`Attn: ${invoice.attention}`), M, cursor, 10, i400, COLORS.muted);
     cursor += 14;
@@ -204,12 +195,12 @@ export async function generateInvoicePdf(
 
   // ---- Notes ----
   if (invoice.notes) {
-    draw(page, "NOTES", M, cursor, 7.5, i600, COLORS.muted);
-    cursor += 14;
-    for (const line of wrap(i400, invoice.notes, 9.5, CONTENT_W)) {
-      ensureSpace(12);
-      draw(page, safe(line), M, cursor, 9.5, i400, COLORS.ink);
-      cursor += 12;
+    draw(page, "NOTES", M, cursor, 8, i600, COLORS.muted);
+    cursor += 16;
+    for (const line of wrap(i400, invoice.notes, 10, CONTENT_W)) {
+      ensureSpace(13);
+      draw(page, safe(line), M, cursor, 10, i400, COLORS.ink);
+      cursor += 13;
     }
     cursor += 8;
   }
@@ -285,6 +276,11 @@ export async function generateInvoicePdf(
   draw(page, grandTotalText, AMT_X, cursor, 12.5, i700, COLORS.terra, "right");
   cursor += 30;
 
+  // ---- VAT note ----
+  const vatNote = "Please note the above payment is without VAT";
+  draw(page, vatNote, AMT_X - grandTotalW - 8, cursor, 8.5, i400, COLORS.muted, "right");
+  cursor += 20;
+
   // ---- Payment details ----
   const accounts = BUSINESS.bankAccounts;
   const hasAccountNames = accounts.some((account) => account.accountName.trim() !== "");
@@ -303,18 +299,18 @@ export async function generateInvoicePdf(
     borderWidth: 0.75,
   });
   let by = boxTop + 16;
-  draw(page, "PAYMENT DETAILS", M + 14, by, 7.5, i600, COLORS.muted);
-  by += 17;
-  draw(page, safe(BUSINESS.name), M + 14, by, 10.5, l700, COLORS.brown);
-  by += 16;
+  draw(page, "PAYMENT DETAILS", M + 14, by, 12, i700, COLORS.muted);
+  by += 20;
+  draw(page, safe(BUSINESS.name), M + 14, by, 14, l700, COLORS.brown);
+  by += 18;
   for (const account of accounts) {
-    draw(page, safe(account.bank), M + 14, by, 9.5, i600, COLORS.ink);
-    draw(page, safe(account.accountNumber), M + 14 + 100, by, 9.5, i400, COLORS.ink);
+    draw(page, safe(account.bank), M + 14, by, 13, i700, COLORS.ink);
+    draw(page, safe(account.accountNumber), M + 14 + 100, by, 13, i700, COLORS.ink);
     if (account.accountName.trim() !== "") {
-      draw(page, safe(`Acct name: ${account.accountName}`), M + 14 + 260, by, 8, i400, COLORS.muted);
-      by += 22;
+      draw(page, safe(`Acct name: ${account.accountName}`), M + 14 + 260, by, 11, i600, COLORS.muted);
+      by += 24;
     } else {
-      by += 15;
+      by += 18;
     }
   }
   cursor = boxTop + boxH + 14;
@@ -346,9 +342,9 @@ export async function generateInvoicePdf(
       thickness: 0.5,
       color: COLORS.line,
     });
-    draw(p, safe(`${BUSINESS.name} \u00B7 ${BUSINESS.slogan}`), PAGE_W / 2, PAGE_H - 36, 7.5, i400, COLORS.muted, "center");
+    draw(p, safe(`${BUSINESS.name} \u00B7 ${BUSINESS.slogan}`), PAGE_W / 2, PAGE_H - 36, 8, i400, COLORS.muted, "center");
     if (pages.length > 1) {
-      draw(p, `Page ${index + 1} of ${pages.length}`, RIGHT, PAGE_H - 36, 7.5, i400, COLORS.muted, "right");
+      draw(p, `Page ${index + 1} of ${pages.length}`, RIGHT, PAGE_H - 36, 8, i400, COLORS.muted, "right");
     }
   });
 
